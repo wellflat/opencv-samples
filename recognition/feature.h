@@ -9,6 +9,7 @@
 namespace multimedia {
   typedef std::map<std::string, std::vector<cv::KeyPoint> > KeyPointsMap;
   typedef std::map<std::string, cv::Mat_<float> > DescriptorsMap;
+  
   namespace fs = boost::filesystem;
   
   class FeatureExtractor {
@@ -27,13 +28,14 @@ namespace multimedia {
     const DescriptorsMap& getDescriptorsMap() const { return descriptorsMap; };
     int getSize() const { return descriptorsMap.size(); };
     void clear();
+    
   private:
     FeatureExtractor(const FeatureExtractor&) = delete;
     FeatureExtractor& operator=(const FeatureExtractor&) = delete;
-    
+
+    std::unique_ptr<cv::ORB> feature;
     KeyPointsMap keypointsMap;
     DescriptorsMap descriptorsMap;
-    std::unique_ptr<cv::ORB> feature;
   };
 }
 
