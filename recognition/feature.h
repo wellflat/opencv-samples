@@ -12,26 +12,36 @@ namespace multimedia {
   
   namespace fs = boost::filesystem;
   
-  class FeatureExtractor {
+  class Feature {
   public:
-    FeatureExtractor();
-    virtual ~FeatureExtractor() = default;
-    void extract(const std::string& pathName);
-    void extract(const std::string& pathName, cv::Mat& descriptors) const;
-    void extractAll(const std::string& dirPathName);
-    void read(const std::string& pathName, cv::Mat& descriptors,
+    Feature();
+    virtual ~Feature() = default;
+    void extract(const std::string& fileName);
+    void extract(const std::string& fileName, cv::Mat& descriptors) const;
+    void extractAll(const std::string& dirName);
+    void read(const std::string& fileName, cv::Mat& descriptors,
               const std::string& keyName = "descriptors") const;
-    void readAll(const std::string& dirPathName) const;
-    void write(const std::string& pathName, const cv::Mat& descriptors,
+    void readAll(const std::string& fileName,
+                 const std::string& dirName);
+    void write(const std::string& fileName,
+               const cv::Mat& descriptors,
                const std::string& keyName = "descriptors") const;
-    void writeAll(const std::string& dirPathName, bool concat = true);
+    void writeAll(const std::string& dirName, bool concat = true);
+    void createVisualWords(const std::string& fileName,
+                           int numVisualWords);
+    void train(const std::string& vocFileName,
+               const std::string& bowFileName);
+               
     const DescriptorsMap& getDescriptorsMap() const { return descriptorsMap; };
     int getSize() const { return descriptorsMap.size(); };
     void clear();
     
   private:
-    FeatureExtractor(const FeatureExtractor&) = delete;
-    FeatureExtractor& operator=(const FeatureExtractor&) = delete;
+    Feature(const Feature&) = delete;
+    Feature& operator=(const Feature&) = delete;
+
+    int getDescriptorCount() const;
+    void createKey(const std::string& dirName);
 
     std::unique_ptr<cv::ORB> feature;
     KeyPointsMap keypointsMap;

@@ -1,26 +1,27 @@
 #include "feature.h"
 
 namespace multimedia {
-  FeatureExtractor::FeatureExtractor() {
+  Feature::Feature() {
     feature.reset(new cv::ORB(500, 1.2f, 8, 31, 0, 2, cv::ORB::FAST_SCORE, 31));
   }
 
-  void FeatureExtractor::extract(const std::string& pathName) {
-    cv::Mat img = cv::imread(pathName);
+  void Feature::extract(const std::string& fileName) {
+    fs::path filePath = fs::path(fileName, fs::native);
+    cv::Mat img = cv::imread(fileName);
     if(img.empty()) {
       throw std::runtime_error("cannot load image");
     }
     std::vector<cv::KeyPoint> keypoints;
     feature->detect(img, keypoints);
-    keypointsMap.insert(KeyPointsMap::value_type(pathName, keypoints));
-    cv::Mat_<float> descriptors;
+    keypointsMap[filePath.stem()] = keypoints;
+    cv::Mat descriptors;
     feature->compute(img, keypoints, descriptors);
-    descriptorsMap.insert(DescriptorsMap::value_type(pathName, descriptors));
+    descriptorsMap[filePath.stem()] = descriptors;
   }
   
-  void FeatureExtractor::extract(const std::string& pathName,
-                                 cv::Mat& descriptors) const {
-    cv::Mat img = cv::imread(pathName);
+  void Feature::extract(const std::string& fileName,
+                        cv::Mat& descriptors) const {
+    cv::Mat img = cv::imread(fileName);
     if(img.empty()) {
       throw std::runtime_error("cannot load image");
     }
@@ -29,73 +30,75 @@ namespace multimedia {
     feature->compute(img, keypoints, descriptors);
   }
 
-  void FeatureExtractor::extractAll(const std::string& dirPathName) {
-    fs::path dirPath = fs::path(dirPathName, fs::native);
+  void Feature::extractAll(const std::string& dirName) {
+    fs::path dirPath = fs::path(dirName, fs::native);
     fs::directory_iterator end;
     for(fs::directory_iterator i(dirPath); i!=end; ++i) {
       /* i: basic_directory_entry */
       fs::path filePath = i->path();
       if(fs::is_directory(filePath)) continue;
-      std::string pathName = i->string();
-      cv::Mat img = cv::imread(pathName);
+      std::string fileName = i->string();
+      cv::Mat img = cv::imread(fileName);
       if(img.empty()) {
-        std::string message = "cannot load image: " + pathName;
+        std::string message = "cannot load image: " + fileName;
         throw std::runtime_error(message);
       }
       std::vector<cv::KeyPoint> keypoints;
       feature->detect(img, keypoints);
-      keypointsMap.insert(KeyPointsMap::value_type(pathName, keypoints));
+      keypointsMap[filePath.stem()] = keypoints;
       cv::Mat descriptors;
       feature->compute(img, keypoints, descriptors);
-      descriptorsMap.insert(DescriptorsMap::value_type(pathName, descriptors));
+      descriptorsMap[filePath.stem()] = descriptors;
     }
   }
 
-  void FeatureExtractor::read(const std::string& pathName,
-                              cv::Mat& descriptors,
-                              const std::string& keyName) const {
-    cv::FileStorage storage(pathName, cv::FileStorage::READ);
+  
+
+  void Feature::read(const std::string& fileName,
+                     cv::Mat& descriptors,
+                     const std::string& keyName) const {
+    cv::FileStorage storage(fileName, cv::FileStorage::READ);
     storage[keyName] >> descriptors;
-  }
-
-  void FeatureExtractor::readAll(const std::string& dirPathName) const {
-    fs::path dirPath = fs::path(dirPathName, fs::native);
-    fs::directory_iterator end;
-    for(fs::directory_iterator i(dirPath); i!=end; ++i) {
-      /* i: basic_directory_entry */
-      fs::path filePath = i->path();
-      if(fs::is_directory(filePath)) continue;
-      std::string pathName = i->string();
-      // TODO: implements
-    }
-  }
-
-  void FeatureExtractor::write(const std::string& pathName,
-                               const cv::Mat& descriptors,
-                               const std::string& keyName) const {
-    cv::FileStorage storage(pathName, cv::FileStorage::WRITE);
-    storage << keyName << descriptors;
     storage.release();
   }
 
-  void FeatureExtractor::writeAll(const std::string& dirPathName,
-                                  bool concat) {
+  void Feature::readAll(const std::string& fileName,
+                        const std::string& dirName) {
+    cv::FileStorage storage(fileName, cv::FileStorage::READ);
+    createKey(dirName);
+    DescriptorsMap::const_iterator it = descriptorsMap.begin();
+    while(it != descriptorsMap.end()) {
+      cv::Mat_<float> descriptors;
+      storage[it->first] >> descriptors;
+      descriptorsMap[it->first] = descriptors;
+      ++it;
+    }
+    storage.release();
+  }
+
+  void Feature::write(const std::string& fileName,
+                      const cv::Mat& descriptors,
+                      const std::string& keyName) const {
+    cv::FileStorage storage(fileName, cv::FileStorage::WRITE);
+    storage << keyName << (cv::Mat_<float>&)descriptors;
+    storage.release();
+  }
+
+  void Feature::writeAll(const std::string& dirName, bool concat) {
     cv::FileStorage storage;
-    fs::path path = fs::path(dirPathName, fs::native);
-    DescriptorsMap::iterator it = descriptorsMap.begin();
+    fs::path path = fs::path(dirName, fs::native);
+    DescriptorsMap::const_iterator it = descriptorsMap.begin();
     if(concat) {
-      std::string yamlPathName = dirPathName + "/descriptors.yml";
-      storage.open(yamlPathName, cv::FileStorage::WRITE);
+      std::string yamlName = dirName + "/descriptors.yml";
+      storage.open(yamlName, cv::FileStorage::WRITE);
     }
     while(it != descriptorsMap.end()) {
-      std::string pathName = it->first;
-      fs::path path(pathName);
       if(concat) {
-        storage << "descriptors_" + path.stem() << it->second;
+        storage << it->first << it->second;
       } else {
-        std::string yamlPathName = dirPathName + '/' + path.stem() + ".yml";
-        storage.open(yamlPathName, cv::FileStorage::WRITE);
-        storage << "descriptors_" + path.stem() << it->second;
+        std::string yamlName = dirName + '/' + it->first + ".yml";
+        storage.open(yamlName, cv::FileStorage::WRITE);
+        storage << path.stem() << it->second;
         storage.release();
       }
       ++it;
@@ -103,9 +106,53 @@ namespace multimedia {
     if(concat) storage.release();
   }
 
-  void FeatureExtractor::clear() {
+  void Feature::createVisualWords(const std::string& fileName,
+                                  int numVisualWords) {
+    cv::BOWKMeansTrainer trainer(numVisualWords);
+    int descriptorCount = getDescriptorCount();
+    DescriptorsMap::const_iterator it = descriptorsMap.begin();
+    while(it != descriptorsMap.end()) {
+      if(!it->second.empty()) {
+        trainer.add(it->second);
+      }
+      ++it;
+    }
+    std::cout << descriptorCount << std::endl;
+    cv::Mat voc = trainer.cluster();
+    cv::FileStorage storage(fileName, cv::FileStorage::WRITE);
+    storage << "vocabulary" << voc;
+    storage.release();
+  }
+
+  void Feature::train(const std::string& vocFileName,
+                      const std::string& bowFileName) {
+    
+  }
+
+  void Feature::clear() {
     keypointsMap.clear();
     descriptorsMap.clear();
+  }
+
+  int Feature::getDescriptorCount() const {
+    int n = 0;
+    DescriptorsMap::const_iterator it = descriptorsMap.begin();
+    while(it != descriptorsMap.end()) {
+      n += it->second.rows;
+      ++it;
+    }
+    return n;
+  }
+  
+  void Feature::createKey(const std::string& dirName){
+    fs::path dirPath = fs::path(dirName, fs::native);
+    fs::directory_iterator end;
+    for(fs::directory_iterator i(dirPath); i!=end; ++i) {
+      fs::path filePath = i->path();
+      if(fs::is_directory(filePath)) continue;
+      keypointsMap[filePath.stem()];
+      descriptorsMap[filePath.stem()];
+    }
   }
 
 }
