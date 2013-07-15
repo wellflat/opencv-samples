@@ -22,15 +22,17 @@ int main(int argc, char** argv) {
     
     //feature.writeAll(basePath + "features", true);
     feature.readAll(basePath + "features/descriptors.yml", basePath);
-    cout << "feature size: " << feature.getSize() << endl;
+    cout << "image count: " << feature.getSize() << endl;
     multimedia::DescriptorsMap descriptorsMap = feature.getDescriptorsMap();
     multimedia::DescriptorsMap::iterator it = descriptorsMap.begin();
     // while(it != descriptorsMap.end()) {
     //   cout << it->first << endl; // path
     //   ++it;
     // }
-    
-    feature.createVisualWords("voc.yml", 100);
+    int n = 100;
+    int descriptorsCount = feature.createVisualWords("voc.yml", n);
+    cout << "descriptors count: " << descriptorsCount << endl;
+    cout << "visual word count: " <<  n << endl;
 
   } catch(const std::exception& e) {
     cerr << e.what() << endl;
