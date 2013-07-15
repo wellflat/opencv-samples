@@ -52,8 +52,6 @@ namespace multimedia {
     }
   }
 
-  
-
   void Feature::read(const std::string& fileName,
                      cv::Mat& descriptors,
                      const std::string& keyName) const {
@@ -106,34 +104,6 @@ namespace multimedia {
     if(concat) storage.release();
   }
 
-  int Feature::createVisualWords(const std::string& fileName,
-                                  int numVisualWords) {
-    cv::BOWKMeansTrainer trainer(numVisualWords);
-    int descriptorCount = getDescriptorCount();
-    DescriptorsMap::const_iterator it = descriptorsMap.begin();
-    while(it != descriptorsMap.end()) {
-      if(!it->second.empty()) {
-        trainer.add(it->second);
-      }
-      ++it;
-    }
-    cv::Mat voc = trainer.cluster();
-    cv::FileStorage storage(fileName, cv::FileStorage::WRITE);
-    storage << "vocabulary" << voc;
-    storage.release();
-    return descriptorCount;
-  }
-
-  void Feature::train(const std::string& vocFileName,
-                      const std::string& bowFileName) {
-    
-  }
-
-  void Feature::clear() {
-    keypointsMap.clear();
-    descriptorsMap.clear();
-  }
-
   int Feature::getDescriptorCount() const {
     int n = 0;
     DescriptorsMap::const_iterator it = descriptorsMap.begin();
@@ -144,6 +114,14 @@ namespace multimedia {
     return n;
   }
   
+  void Feature::clear() {
+    keypointsMap.clear();
+    descriptorsMap.clear();
+  }
+
+  /*
+   * private methods
+   */
   void Feature::createKey(const std::string& dirName){
     fs::path dirPath = fs::path(dirName, fs::native);
     fs::directory_iterator end;

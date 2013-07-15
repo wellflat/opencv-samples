@@ -1,13 +1,14 @@
 #include <iostream>
 #include <stdexcept>
 #include "feature.h"
+#include "recognizer.h"
 
 /* test code */
 int main(int argc, char** argv) {
   using namespace std;
   try {
     multimedia::Feature feature;
-    string basePath = "../dstfiles/kitten/";
+    string basePath = "./dstfiles/kitten/";
     string fileName = basePath + "frame100.jpg";
     string yamlName = basePath + "features/frame100.yml";
     cv::Mat descriptors, descriptors2;
@@ -26,11 +27,13 @@ int main(int argc, char** argv) {
     multimedia::DescriptorsMap descriptorsMap = feature.getDescriptorsMap();
     multimedia::DescriptorsMap::iterator it = descriptorsMap.begin();
     // while(it != descriptorsMap.end()) {
-    //   cout << it->first << endl; // path
+    //   cout << it->first << endl;
     //   ++it;
     // }
+    int descriptorsCount = feature.getDescriptorCount();
     int n = 100;
-    int descriptorsCount = feature.createVisualWords("voc.yml", n);
+    multimedia::Recognizer recognizer;
+    recognizer.createVisualWords(descriptorsMap, "./data/voc.yml", n);
     cout << "descriptors count: " << descriptorsCount << endl;
     cout << "visual word count: " <<  n << endl;
 

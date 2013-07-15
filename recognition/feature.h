@@ -27,20 +27,16 @@ namespace multimedia {
                const cv::Mat& descriptors,
                const std::string& keyName = "descriptors") const;
     void writeAll(const std::string& dirName, bool concat = true);
-    int createVisualWords(const std::string& fileName,
-                           int numVisualWords);
-    void train(const std::string& vocFileName,
-               const std::string& bowFileName);
                
     const DescriptorsMap& getDescriptorsMap() const { return descriptorsMap; };
     int getSize() const { return descriptorsMap.size(); };
+    int getDescriptorCount() const;
     void clear();
     
   private:
     Feature(const Feature&) = delete;
     Feature& operator=(const Feature&) = delete;
 
-    int getDescriptorCount() const;
     void createKey(const std::string& dirName);
 
     std::unique_ptr<cv::ORB> feature;
