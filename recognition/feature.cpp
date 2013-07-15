@@ -106,7 +106,7 @@ namespace multimedia {
     if(concat) storage.release();
   }
 
-  void Feature::createVisualWords(const std::string& fileName,
+  int Feature::createVisualWords(const std::string& fileName,
                                   int numVisualWords) {
     cv::BOWKMeansTrainer trainer(numVisualWords);
     int descriptorCount = getDescriptorCount();
@@ -117,11 +117,11 @@ namespace multimedia {
       }
       ++it;
     }
-    std::cout << descriptorCount << std::endl;
     cv::Mat voc = trainer.cluster();
     cv::FileStorage storage(fileName, cv::FileStorage::WRITE);
     storage << "vocabulary" << voc;
     storage.release();
+    return descriptorCount;
   }
 
   void Feature::train(const std::string& vocFileName,

@@ -27,7 +27,7 @@ namespace multimedia {
                const cv::Mat& descriptors,
                const std::string& keyName = "descriptors") const;
     void writeAll(const std::string& dirName, bool concat = true);
-    void createVisualWords(const std::string& fileName,
+    int createVisualWords(const std::string& fileName,
                            int numVisualWords);
     void train(const std::string& vocFileName,
                const std::string& bowFileName);
