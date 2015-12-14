@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = `pkg-config --cflags opencv`
+CXXFLAGS = `pkg-config --cflags opencv` -std=c++11
 LDFLAGS = `pkg-config --libs opencv`
 TARGET = $@
 SOURCE = $(TARGET).cpp

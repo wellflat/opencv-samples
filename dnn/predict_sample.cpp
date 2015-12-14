@@ -50,17 +50,17 @@ int main(int argc, char** argv) {
     // データ例: categoryList[951] = "lemon";
     vector<string> categoryList;
     string category;
-    ifstream fp("synset_words.txt");
-    if(!fp.is_open()) {
+    ifstream fs("synset_words.txt");
+    if(!fs.is_open()) {
       cerr << "can't read file" << endl;
       exit(-1);
     }
-    while(std::getline(fp, category)) {
+    while(getline(fs, category)) {
       if(category.length()) {
         categoryList.push_back(category.substr(category.find(' ') + 1));
       }
     }
-    fp.close();
+    fs.close();
     // 予測したカテゴリと確率(信頼度)を出力
     cv::Mat_<int>::const_iterator it = topk.begin<int>();
     while(it != topk.end<int>()) {
