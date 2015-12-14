@@ -47,25 +47,25 @@ int main(int argc, char** argv) {
     cv::sortIdx(probMat, sorted, CV_SORT_EVERY_ROW|CV_SORT_DESCENDING);
     cv::Mat topk = sorted(cv::Rect(0, 0, 5, 1));
     // カテゴリ名のリストファイル(synset_words.txt)を読み込み
-    // データ例: classNames[951] = "lemon";
-    vector<string> classNames;
-    string className;
+    // データ例: categoryList[951] = "lemon";
+    vector<string> categoryList;
+    string category;
     ifstream fp("synset_words.txt");
     if(!fp.is_open()) {
       cerr << "can't read file" << endl;
       exit(-1);
     }
-    while(!fp.eof()) {
-      std::getline(fp, className);
-      if(className.length()) {
-        classNames.push_back(className.substr(className.find(' ') + 1));
+    while(std::getline(fp, category)) {
+      if(category.length()) {
+        categoryList.push_back(category.substr(category.find(' ') + 1));
       }
     }
     fp.close();
     // 予測したカテゴリと確率(信頼度)を出力
     cv::Mat_<int>::const_iterator it = topk.begin<int>();
-    for(;it!=topk.end<int>(); ++it) {
-      cout << classNames[*it] << " : " << probMat.at<float>(*it) * 100 << " %" << endl;
+    while(it != topk.end<int>()) {
+      cout << categoryList[*it] << " : " << probMat.at<float>(*it) * 100 << " %" << endl;
+      ++it;
     }
     
   } catch(const cv::Exception& e) {
