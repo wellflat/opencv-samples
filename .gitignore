@@ -1,0 +1,24 @@
+## MAC OSX
+.DS_Store
+
+## EMACS
+*~
+\#*
+.\#*
+
+## VIM
+*.swp
+
+## PROJECT::GENERAL
+*.so
+*.o
+*.jpg
+*.png
+coverage
+rdoc
+pkg
+
+## PROJECT::SPECIFIC
+*.log
+*.dat
+*.npy
