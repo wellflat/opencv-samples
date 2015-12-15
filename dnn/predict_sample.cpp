@@ -41,6 +41,7 @@ int main(int argc, char** argv) {
     net.forward();
     // 出力層(Softmax)の出力を取得, ここに予測結果が格納されている
     const cv::dnn::Blob prob = net.getBlob("prob");
+    cout << "blob shape: " << prob.shape() << endl;
     // Blobオブジェクト内部のMatオブジェクトへの参照を取得
     // ImageNet 1000クラス毎の確率(32bits浮動小数点値)が格納された1x1000の行列(ベクトル)
     const cv::Mat probMat = prob.matRefConst();
