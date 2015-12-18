@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
     // データ例: categoryList[951] = "lemon";
     vector<string> categoryList;
     string category;
-    ifstream fs(wordsFile);
+    ifstream fs(wordsFile.c_str());
     if(!fs.is_open()) {
       cerr << "can't read file" << endl;
       exit(-1);

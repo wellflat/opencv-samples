@@ -6,7 +6,7 @@
  */
 void loadImages(string listFileName, string rootPath,
                 vector<cv::Mat>& images, vector<int>& labels,
-                int cropSize) {
+                bool isResize, int cropSize) {
   ifstream fs(listFileName.c_str());
   if(!fs.is_open()) {
     cerr << "can't read list file" << endl;
@@ -19,9 +19,12 @@ void loadImages(string listFileName, string rootPath,
     found = line.find(' ', current);
     filePath = string(line, current, found - current);
     cv::Mat image = cv::imread(rootPath + filePath);
-    cv::resize(image, image, cv::Size(cropSize, cropSize));
+    if(image.empty()) continue;
+    if(isResize) {
+      cv::resize(image, image, cv::Size(cropSize, cropSize));
+    }
     current = found + 1;
-    label = stoi(string(line, current, line.size() - current));
+    label = atoi(string(line, current, line.size() - current).c_str());
     images.push_back(image);
     labels.push_back(label);
   }
@@ -31,7 +34,7 @@ void loadImages(string listFileName, string rootPath,
 const vector<string> loadSynsetWords(string fileName) {
   vector<string> labels;
   string label;
-  ifstream fs(fileName);
+  ifstream fs(fileName.c_str());
   if(!fs.is_open()) {
     cerr << "can't read file" << endl;
     exit(-1);

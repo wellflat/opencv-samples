@@ -10,8 +10,9 @@ train(const string& protoFile, const string& modelFile,
   net->setBlob(".data", input);
   net->forward();
   // 全結合層 fc7(InnerProduct)の出力を特徴量として抽出
+  cout << "extract feature" << endl;
   const cv::dnn::Blob blob = net->getBlob("fc7");
-  net.release(); // decrement refcount
+  net.release();
   const cv::Mat feature = blob.matRefConst();
   cout << feature.size() << endl;
   cout << "train model" << endl;

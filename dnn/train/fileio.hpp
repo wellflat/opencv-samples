@@ -11,8 +11,8 @@
 using namespace std;
 
 void loadImages(string listFileName, string rootPath,
-                vector<cv::Mat>& images, vector<int>& labels, /* out */
-                int cropSize=224);
+                vector<cv::Mat>& images, vector<int>& labels, /* out parameters */
+                bool isResize=false, int cropSize=224);
 
 const vector<string> loadSynsetWords(string fileName);
 
