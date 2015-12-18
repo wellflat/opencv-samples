@@ -3,15 +3,16 @@
 #include <opencv2/dnn.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
-
 using namespace std;
 
 int main(int argc, char** argv) {
+  string dataBaseDir = "../data/";
   // ImageNet Caffeリファレンスモデル
-  string protoTxtFile = "bvlc_reference_caffenet/deploy.prototxt";
-  string caffeModelFile = "bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel";
-  // 画像ファイル
-  string imageFile = (argc > 1) ? argv[1] : "images/cat.jpg";
+  string protoTxtFile = dataBaseDir + "bvlc_reference_caffenet/deploy.prototxt";
+  string caffeModelFile = dataBaseDir + "bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel";
+  string wordsFile = dataBaseDir + "bvlc_reference_caffenet/synset_words.txt";
+  // 予測処理確認用の画像ファイル
+  string imageFile = (argc > 1) ? argv[1] : dataBaseDir + "images/cat.jpg";
   // Caffeモデルの読み込み
   cv::Ptr<cv::dnn::Importer> importer;
   try {
@@ -23,7 +24,7 @@ int main(int argc, char** argv) {
   cv::dnn::Net net;
   importer->populateNet(net);
   importer.release();
-  // テスト用の入力画像ファイルの読み込み
+  // 画像ファイルの読み込み
   cv::Mat img = cv::imread(imageFile);
   if(img.empty()) {
     cerr << "can't read image: " << imageFile << endl;
@@ -41,7 +42,6 @@ int main(int argc, char** argv) {
     net.forward();
     // 出力層(Softmax)の出力を取得, ここに予測結果が格納されている
     const cv::dnn::Blob prob = net.getBlob("prob");
-    cout << "blob shape: " << prob.shape() << endl;
     // Blobオブジェクト内部のMatオブジェクトへの参照を取得
     // ImageNet 1000クラス毎の確率(32bits浮動小数点値)が格納された1x1000の行列(ベクトル)
     const cv::Mat probMat = prob.matRefConst();
@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
     // データ例: categoryList[951] = "lemon";
     vector<string> categoryList;
     string category;
-    ifstream fs("synset_words.txt");
+    ifstream fs(wordsFile);
     if(!fs.is_open()) {
       cerr << "can't read file" << endl;
       exit(-1);

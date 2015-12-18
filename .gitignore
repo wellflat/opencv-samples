@@ -12,8 +12,10 @@
 ## PROJECT::GENERAL
 *.so
 *.o
+*.d
 *.jpg
 *.png
+*.bz2
 coverage
 rdoc
 pkg
