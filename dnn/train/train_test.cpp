@@ -17,22 +17,27 @@ train(const string& protoFile, const string& modelFile,
   cout << feature.size() << endl;
   cout << "train model" << endl;
   // 線形SVM or ロジスティック回帰で学習
-  cv::Ptr<cv::ml::TrainData> data =
-    cv::ml::TrainData::create(feature, cv::ml::ROW_SAMPLE, cv::Mat(trainLabel, false));
   if(type == "SVM") {
+    cv::Ptr<cv::ml::TrainData> data =
+      cv::ml::TrainData::create(feature, cv::ml::ROW_SAMPLE, cv::Mat(trainLabel, false));
     cv::Ptr<cv::ml::SVM> clf = cv::ml::SVM::create();
     clf->setType(cv::ml::SVM::C_SVC);
     clf->setKernel(cv::ml::SVM::LINEAR);
-    clf->trainAuto(data, kFold); // k-fold cross validation
+    clf->trainAuto(data, kFold); // グリッドサーチ + 交差検証
     return clf;
   } else {
+    cv::Mat tmp = cv::Mat(trainLabel, false);
+    cv::Mat trainLabel32F;
+    tmp.convertTo(trainLabel32F, CV_32F);
+      cv::Ptr<cv::ml::TrainData> data =
+        cv::ml::TrainData::create(feature, cv::ml::ROW_SAMPLE, trainLabel32F);
     cv::Ptr<cv::ml::LogisticRegression> clf =
       cv::ml::LogisticRegression::create();
-    clf->setLearningRate(0.01);
-    clf->setIterations(1000);
+    clf->setLearningRate(0.001);
+    clf->setIterations(10000);
     clf->setRegularization(cv::ml::LogisticRegression::REG_L2);
     clf->setTrainMethod(cv::ml::LogisticRegression::MINI_BATCH);
-    clf->setMiniBatchSize(10);
+    clf->setMiniBatchSize(20);
     clf->train(data);
     return clf;
   }

@@ -7,11 +7,13 @@ int main(int argc, char** argv) {
   string dataBaseDir = "../data/";
   string protoFile = dataBaseDir + "bvlc_reference_caffenet/deploy.prototxt";
   string modelFile = dataBaseDir + "bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel";
-  string trainListFile = dataBaseDir + "catnet/data/val.txt";
+  string trainListFile = dataBaseDir + "catnet/data/train.txt";
   string testListFile = dataBaseDir + "catnet/data/val.txt";
-  string svmModelFile = dataBaseDir + "model.yml";
+  string labelFile = dataBaseDir + "catnet/data/cat_label.tsv";
+  string svmModelFile = dataBaseDir + "svm_model.yml";
   vector<cv::Mat> trainData, testData;
   vector<int> trainLabel, testLabel;
+  
   enum Mode { PREDICT = 0, TRAIN = 1, TEST = 2};
   const cv::String keys =
     "{h help |               |print this message       }"
@@ -28,7 +30,7 @@ int main(int argc, char** argv) {
   case TRAIN:
     {
       cout << "extract feature and train SVM" << endl;
-      cout << "training data load." << endl;
+      cout << "loading training data." << endl;
       bool isResize = false;
       loadImages(trainListFile, dataBaseDir + "catnet/data/", trainData, trainLabel, isResize);
       cout << trainData.size() << " data load complete." << endl;
@@ -42,7 +44,7 @@ int main(int argc, char** argv) {
       cv::Ptr<cv::dnn::Net> net = loadNet(protoFile, modelFile);
       cv::Ptr<cv::ml::SVM> clf = cv::Algorithm::load<cv::ml::SVM>(svmModelFile);
       cout << "Cost: " << clf->getC() << endl;
-      cout << "test data load." << endl;
+      cout << "loading test data." << endl;
       loadImages(testListFile, dataBaseDir + "catnet/data/", testData, testLabel);
       cout << testData.size() << " data load complete." << endl;
       const cv::dnn::Blob input = cv::dnn::Blob(testData);
@@ -51,14 +53,22 @@ int main(int argc, char** argv) {
       net->forward();
       const cv::dnn::Blob blob = net->getBlob("fc7");
       const cv::Mat feature = blob.matRefConst();
+      saveMat("test_feature.yml", "feature", feature);
       cout << "calculate error rate." << endl;
-      cout << calculateError(clf, feature, cv::Mat(testLabel, false)) << endl;
+      cout << "error: " << calculateError(clf, feature, cv::Mat(testLabel, false)) << endl;
       break;
     }
   case PREDICT:
     {
+      vector<string> labels = loadLabels(labelFile);
       cv::Ptr<cv::dnn::Net> net = loadNet(protoFile, modelFile);
-      cv::Ptr<cv::ml::SVM> clf = cv::Algorithm::load<cv::ml::SVM>(svmModelFile);
+      cv::Ptr<cv::ml::StatModel> clf;
+      bool isSVM = true;
+      if(isSVM) {
+        clf = cv::Algorithm::load<cv::ml::SVM>(svmModelFile);
+      } else {
+        clf = cv::Algorithm::load<cv::ml::LogisticRegression>(svmModelFile);
+      }
       string fileName = parser.get<string>(0);
       cv::Mat image = cv::imread(fileName);
       if(image.empty()) {
@@ -73,22 +83,16 @@ int main(int argc, char** argv) {
       net->forward();
       const cv::dnn::Blob blob = net->getBlob("fc7");
       const cv::Mat feature = blob.matRefConst();
-      float pred = clf->predict(feature);
-      cout << "predict label: " << pred << endl;
+      cv::Mat res;
+      clf->predict(feature, res);
+      cout << res << endl;
+      cout << labels[res.at<int>(0)] << endl;
+      //float pred = clf->predict(feature);
+      //cout << pred << endl;
+      //cout << "predict label: " << labels[pred] << endl;
       break;
     }
   default:
-    // cv::Mat feature = loadMat("../data/feature.yml", "feature");
-    // cout << feature.size() << endl;
-    // cv::Mat labels = loadMat("../data/label.yml", "label");
-    // cout << labels.size() << endl;
-    cv::Mat m = loadMat("../data/feature2.yml", "label");
-    cout << m.size() << endl;
-    cout << saveMat("../data/label3.yml", "label", m) << endl;
-    //cv::FileStorage fs("../data/feature2.yml", cv::FileStorage::WRITE);
-    //fs << "feature" << feature;
-    //fs << "label" << labels;
-    //fs.release();
     break;
   }
   return 0;

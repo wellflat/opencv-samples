@@ -16,6 +16,8 @@ void loadImages(string listFileName, string rootPath,
 
 const vector<string> loadSynsetWords(string fileName);
 
+const vector<string> loadLabels(string fileName, char delimiter='\t');
+
 cv::Ptr<cv::dnn::Net> loadNet(string protoFile, string modelFile);
 
 bool saveMat(string fileName, string key, const cv::Mat& mat);

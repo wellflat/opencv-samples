@@ -10,7 +10,7 @@ void loadImages(string listFileName, string rootPath,
   ifstream fs(listFileName.c_str());
   if(!fs.is_open()) {
     cerr << "can't read list file" << endl;
-    exit(-1);
+    return;
   }
   string line, filePath;
   int label;
@@ -35,9 +35,9 @@ const vector<string> loadSynsetWords(string fileName) {
   vector<string> labels;
   string label;
   ifstream fs(fileName.c_str());
-  if(!fs.is_open()) {
-    cerr << "can't read file" << endl;
-    exit(-1);
+  if(fs.fail()) {
+    cerr << "can't read file: " << fileName << endl;
+    return labels;
   }
   while(getline(fs, label)) {
     if(label.length()) {
@@ -46,6 +46,31 @@ const vector<string> loadSynsetWords(string fileName) {
   }
   fs.close();
   return labels;  // expects NRVO
+}
+
+const vector<string> loadLabels(string fileName, char delimiter) {
+  vector<string> labels;
+  string line;
+  ifstream fs(fileName.c_str());
+  
+  if(fs.fail()) {
+    cerr << "can't read file: " << fileName << endl;
+    return labels;
+  }
+  while(getline(fs, line)) {
+    istringstream iss(line);
+    string token;
+    stringstream ss;
+    int label;
+    string labelName;
+    while(getline(iss, token, delimiter)) {
+      ss << token;
+      ss >> labelName;
+    }
+    labels.push_back(labelName);
+  }
+  fs.close();
+  return labels;
 }
 
 cv::Ptr<cv::dnn::Net> loadNet(string protoFile, string modelFile) {
