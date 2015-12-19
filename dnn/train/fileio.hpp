@@ -18,7 +18,7 @@ const vector<string> loadSynsetWords(string fileName);
 
 cv::Ptr<cv::dnn::Net> loadNet(string protoFile, string modelFile);
 
-void saveMat(string fileName, string key, const cv::Mat& mat);
+bool saveMat(string fileName, string key, const cv::Mat& mat);
 
 const cv::Mat loadMat(string fileName, string key);
 

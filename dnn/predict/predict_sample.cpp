@@ -11,7 +11,7 @@ int main(int argc, char** argv) {
   string protoTxtFile = dataBaseDir + "bvlc_reference_caffenet/deploy.prototxt";
   string caffeModelFile = dataBaseDir + "bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel";
   string wordsFile = dataBaseDir + "bvlc_reference_caffenet/synset_words.txt";
-  // 予測処理確認用の画像ファイル
+  // 動作確認用の画像ファイル
   string imageFile = (argc > 1) ? argv[1] : dataBaseDir + "images/cat.jpg";
   // Caffeモデルの読み込み
   cv::Ptr<cv::dnn::Importer> importer;
@@ -38,12 +38,12 @@ int main(int argc, char** argv) {
     const cv::dnn::Blob inputBlob = cv::dnn::Blob(img);
     // 入力層に画像を入力
     net.setBlob(".data", inputBlob);
-    // フォワードパス(順伝播)実行
+    // フォワードパス(順伝播)の計算
     net.forward();
     // 出力層(Softmax)の出力を取得, ここに予測結果が格納されている
     const cv::dnn::Blob prob = net.getBlob("prob");
     // Blobオブジェクト内部のMatオブジェクトへの参照を取得
-    // ImageNet 1000クラス毎の確率(32bits浮動小数点値)が格納された1x1000の行列(ベクトル)
+    // ImageNet 1000クラス毎の確率が格納された1x1000の行列(ベクトル)
     const cv::Mat probMat = prob.matRefConst();
     // 確率(信頼度)の高い順にソートして、上位5つのインデックスを取得
     cv::Mat sorted(probMat.rows, probMat.cols, CV_32F);

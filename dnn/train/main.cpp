@@ -78,6 +78,17 @@ int main(int argc, char** argv) {
       break;
     }
   default:
+    // cv::Mat feature = loadMat("../data/feature.yml", "feature");
+    // cout << feature.size() << endl;
+    // cv::Mat labels = loadMat("../data/label.yml", "label");
+    // cout << labels.size() << endl;
+    cv::Mat m = loadMat("../data/feature2.yml", "label");
+    cout << m.size() << endl;
+    cout << saveMat("../data/label3.yml", "label", m) << endl;
+    //cv::FileStorage fs("../data/feature2.yml", cv::FileStorage::WRITE);
+    //fs << "feature" << feature;
+    //fs << "label" << labels;
+    //fs.release();
     break;
   }
   return 0;

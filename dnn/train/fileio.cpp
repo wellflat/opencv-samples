@@ -57,16 +57,17 @@ cv::Ptr<cv::dnn::Net> loadNet(string protoFile, string modelFile) {
   return net;
 }
 
-void saveMat(string fileName, string key, const cv::Mat& mat) {
+bool saveMat(string fileName, string key, const cv::Mat& mat) {
   cv::FileStorage fs(fileName, cv::FileStorage::WRITE);
-  cv::internal::WriteStructContext ws(fs, key, CV_NODE_SEQ);
-  cv::write(fs, "", mat);
+  fs << key << mat;
+  fs.release();
+  return true;
 }
 
 const cv::Mat loadMat(string fileName, string key) {
-  // cv::FileStorage fs(fileName, cv::FileStorage::READ);
-  // cv::internal::WriteStructContext ws(fs, key, CV_NODE_SEQ);
-  cv::Mat mat;
-  // cv::read(fs, "", mat);
-  return mat;  // expects NRVO
+   cv::FileStorage fs(fileName, cv::FileStorage::READ);
+   cv::Mat output;
+   fs[key] >> output;
+   fs.release();
+   return output;  // expects NRVO
 }
