@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 2.8)
+project(lsd_sample)
+set(CMAKE_CXX_FLAGS "-Wall -g")
+include_directories(/usr/local/opencv-3.2.0/include)
+link_directories(/usr/local/opencv-3.2.0/lib)
+add_executable(lsd_sample lsd_sample.cpp)
+target_link_libraries(lsd_sample opencv_core opencv_imgproc opencv_imgcodecs opencv_highgui)
