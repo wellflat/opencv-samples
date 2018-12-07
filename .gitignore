@@ -13,8 +13,6 @@
 *.so
 *.o
 *.d
-*.jpg
-*.png
 *.bz2
 coverage
 rdoc

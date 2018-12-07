@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.5.1)
+project(qrcode_sample)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_FLAGS "-Wall -g")
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+add_executable(qrcode_sample qrcode_sample.cpp)
+target_link_libraries(qrcode_sample ${OpenCV_LIBRARIES})
