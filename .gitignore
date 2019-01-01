@@ -1,24 +1,26 @@
-## MAC OSX
+## macOS
 .DS_Store
 
-## EMACS
+## Emacx
 *~
 \#*
 .\#*
 
-## VIM
+## Vim
 *.swp
 
 ## PROJECT::GENERAL
 *.so
 *.o
 *.d
+*.gz
 *.bz2
-coverage
-rdoc
-pkg
 
 ## PROJECT::SPECIFIC
 *.log
-*.dat
 *.npy
+*.npz
+*.pb
+CMakeCache.txt
+cmake_install.cmake
+CMakeFiles/
