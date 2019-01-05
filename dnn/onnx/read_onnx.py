@@ -29,7 +29,8 @@ if __name__ == '__main__':
             blob = cv2.dnn.blobFromImage(preprocessed)
             print(blob.shape)
             ## ONNXファイルの読み込み
-            model_file = 'resnet50/model.onnx'
+            #model_file = 'resnet50/model.onnx'
+            model_file = 'shufflenet/model.onnx'
             net = cv2.dnn.readNetFromONNX(model_file)
             ## 入力画像データの指定
             net.setInput(blob)
